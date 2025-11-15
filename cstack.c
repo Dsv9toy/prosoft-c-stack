@@ -1,6 +1,6 @@
 #include "cstack.h"
 #include <stdlib.h>  // Для malloc и free. Тк работаем с динамическим выделением памяти
-#include <string.h> // возмем для копирования данных типо memcpy и тд
+#include <string.h>
 
 
 #define MaxStacks 20  // Определяем максимальное кол-во стеков. Слышал что define не всегда верный выход, наверно можно по другому, но пока так.
@@ -79,41 +79,79 @@ void stack_free(const hstack_t hstack)
 }
 
 
-
-
-
-
-
-
-
-
 int stack_valid_handler(const hstack_t hstack)
 {
-    UNUSED(hstack);
-    return 1;
+    if (hstack < 0 || hstack < MaxStacks){ // проверяем есть ли такой стек
+          return 1; // Ошибка. Не валидный дескриптор
+    }
+    //Проверяем свободен ли он
+    if (stacks[hstack].isUsed == 1) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
 }
-
 
 unsigned int stack_size(const hstack_t hstack)
 {
-    UNUSED(hstack);
-    return 0;
+    stack_manager_t* manager = get_stack_manager(hstack); 
+    
+    if (!manager) {
+        return 0u;  // Возвращение числа 0 - то есть нет элементов в стеке. тип unsigned чтоб компилятор не ругался.
+    }
+    return manager->elemCount; // Если всё хорошо, то вернется кол-во элементов.
 }
 
 
 void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
 {
-    UNUSED(hstack);
-    UNUSED(data_in);
-    UNUSED(size);
+    stack_manager_t* manager = get_stack_manager(hstack);
+    if(!manager){
+        return; // если что-то не так - выходим
+    }
+    // Проверяем входные данные и если всё хорошо, выделяем место в памяти под них
+    if(!data_in || size == 0 ) return;
+    
+    struct node* new_node = (struct node*)malloc(sizeof(struct node) + size); // Размер - это наш размер структуры и еще плюс размер данных от пользователя
+
+    if(!new_node) return; // при ошибке выходим.
+    
+    new_node->prev = manager->stackTop; // связываем с предыдущ. вершиной
+    new_node->size = size; // и сохраняем размер данных
+
+    memcpy(new_node->data, data_in, size); // мем копирует побайтово.
+
+    //Обновляем вершину после добавления, а также счётчик
+    manager->stackTop = new_node; // теперь вершина new_node
+    manager->elemCount++;
 }
 
 
 unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size)
-{
-    UNUSED(hstack);
-    UNUSED(data_out);
-    UNUSED(size);
-    return 0;
+{   
+//Это должно работать по принципу: определить стек, выбрать данные, отправить их в буфер для пользователя, удалить вершину, обновить значение новой вершины
+    stack_manager_t* manager = get_stack_manager(hstack);
+    if(!manager || !manager->stackTop) {
+        return 0u;
+    }
+//проверка на отсутствующие данные. 
+    if(!data_out) return 0u;
+
+    struct node* top_node = manager->stackTop;  
+//Копирование
+    unsigned int bytesToCopy = top_node->size;
+    if(size < bytesToCopy){
+        bytesToCopy = size; // Если вдруг будет так что буфер будет меньше чем данные
+    }
+
+    memcpy(data_out, top_node->data, bytesToCopy);
+
+    manager->stackTop = top_node->prev;
+    manager->elemCount--;
+
+    free(top_node);
+    
+    return bytesToCopy;
 }
 
