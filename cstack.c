@@ -81,10 +81,11 @@ void stack_free(const hstack_t hstack)
 
 int stack_valid_handler(const hstack_t hstack)
 {
-    if (hstack < 0 || hstack < MaxStacks){ // проверяем есть ли такой стек
+    if (hstack < 0 || hstack >= MaxStacks){ 
           return 1; // Ошибка. Не валидный дескриптор
     }
-    //Проверяем свободен ли он
+ 
+    //Обращение
     if (stacks[hstack].isUsed == 1) {
         return 0;
     }
