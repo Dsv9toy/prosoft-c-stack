@@ -137,9 +137,17 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
         return 0u;
     }
 //проверка на отсутствующие данные. 
+
     if(!data_out) return 0u;
 
     struct node* top_node = manager->stackTop;  
+
+    // Программа не прошла тест по попыткам извлечь неправильные аргументы. 
+    // Согласно тесту, если размеры не совпадают - возвращаем 0. Попытка исправить.
+    if (size != top_node->size) {
+        return 0u;  
+    }
+
 //Копирование
     unsigned int bytesToCopy = top_node->size;
     if(size < bytesToCopy){
