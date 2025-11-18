@@ -96,7 +96,7 @@ int stack_valid_handler(const hstack_t hstack)
 
 unsigned int stack_size(const hstack_t hstack)
 {
-    stack_manager_t* manager = get_stack_manager(hstack); 
+    const stack_manager_t* manager = get_stack_manager(hstack); // Явно укажем что изменению не подлежит(const)
     
     if (!manager) {
         return 0u;  // Возвращение числа 0 - то есть нет элементов в стеке. тип unsigned чтоб компилятор не ругался.
@@ -149,9 +149,13 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
     }
 
 //Копирование
-    unsigned int bytesToCopy = top_node->size;
+     //Попытка исправить логику. То есть если размер буфера меньше копируемых данных - то копируем только то что влезет, а если больше - приравниваем всё и выводим всё
+    unsigned int bytesToCopy;
     if(size < bytesToCopy){
-        bytesToCopy = size; // Если вдруг будет так что буфер будет меньше чем данные
+        bytesToCopy = size; 
+    }
+    else{
+        bytesToCopy = top_node->size;
     }
 
     memcpy(data_out, top_node->data, bytesToCopy);
