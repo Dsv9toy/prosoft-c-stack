@@ -82,7 +82,7 @@ int stack_valid_handler(const hstack_t hstack)
     }
  
     //Обращение
-    (stacks[hstack].isUsed == 1) ? 0 : 1 ;
+    return (stacks[hstack].isUsed == 1) ? 0 : 1 ;
 }
 
 unsigned int stack_size(const hstack_t hstack)
