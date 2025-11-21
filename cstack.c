@@ -5,10 +5,6 @@
 
 #define MaxStacks 20  // Определяем максимальное кол-во стеков. Слышал что define не всегда верный выход, наверно можно по другому, но пока так.
 
-// тут у нас макрос для подавления предупреждений о неиспользуемых переменных. Как уже говорили на лекциях, компилятор видит что данные вычислились, но результат
-// не выводится. Он бы мог поругаться на то что рез-т не исп-ся, но не делает этого. 
-#define UNUSED(VAR) (void)(VAR)
-
 //Опишем наш стек, а точнее его внутреннюю структуру данных. Тут что храним, какого размера.
 struct node
 {
@@ -86,12 +82,7 @@ int stack_valid_handler(const hstack_t hstack)
     }
  
     //Обращение
-    if (stacks[hstack].isUsed == 1) {
-        return 0;
-    }
-    else {
-        return 1;
-    }
+    (stacks[hstack].isUsed == 1) ? 0 : 1 ;
 }
 
 unsigned int stack_size(const hstack_t hstack)
@@ -142,29 +133,18 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
 
     struct node* top_node = manager->stackTop;  
 
-    // Программа не прошла тест по попыткам извлечь неправильные аргументы. 
-    // Согласно тесту, если размеры не совпадают - возвращаем 0. Попытка исправить.
     if (size != top_node->size) {
         return 0u;  
     }
 
 //Копирование
-     //Попытка исправить логику. То есть если размер буфера меньше копируемых данных - то копируем только то что влезет, а если больше - приравниваем всё и выводим всё
-    unsigned int bytesToCopy;
-    if(size < bytesToCopy){
-        bytesToCopy = size; 
-    }
-    else{
-        bytesToCopy = top_node->size;
-    }
-
-    memcpy(data_out, top_node->data, bytesToCopy);
+    memcpy(data_out, top_node->data, size);
 
     manager->stackTop = top_node->prev;
     manager->elemCount--;
 
     free(top_node);
     
-    return bytesToCopy;
+    return size;
 }
 
